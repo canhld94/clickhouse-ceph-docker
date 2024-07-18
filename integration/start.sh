@@ -2,18 +2,19 @@
 set -ex
 
 CLUSTER=ceph
-OSD_COUNT=1
 HOSTNAME=$(hostname -s)
 ADMIN_KEYRING=/etc/ceph/${CLUSTER}.client.admin.keyring
+ADMIN_SECRET=${ADMIN_SECRET:-}
 MON_NAME=${HOSTNAME}
 MON_KEYRING=/etc/ceph/${CLUSTER}.mon.keyring
 MONMAP=/etc/ceph/monmap-${CLUSTER}
 MON_DATA_DIR=/var/lib/ceph/mon/${CLUSTER}-${MON_NAME}
 MGR_NAME=${HOSTNAME}
 MGR_PATH="/var/lib/ceph/mgr/${CLUSTER}-${MGR_NAME}"
-MON_IP=$(getent ahostsv4 $HOSTNAME | grep STREAM | head -n 1 | cut -d ' ' -f 1) 
+MON_IP=$(getent ahostsv4 $HOSTNAME | grep STREAM | head -n 1 | cut -d ' ' -f 1)
+OSD_COUNT=1
+OSD_MAX_OBJECT_SIZE=${OSD_MAX_OBJECT_SIZE:-134217728}
 DAEMON_OPTS=(--cluster "${CLUSTER}" --setuser ceph --setgroup ceph --default-log-to-stderr=true --err-to-stderr=true --default-log-to-file=false)
-ADMIN_SECRET=${ADMIN_SECRET:-}
 
 function log {
     if [ -z "$*" ]; then
@@ -41,6 +42,7 @@ public network = ${CEPH_PUBLIC_NETWORK}
 cluster network = ${CEPH_PUBLIC_NETWORK}
 osd pool default size = 1
 osd_crush_chooseleaf_type = {0}
+osd_max_object_size = ${OSD_MAX_OBJECT_SIZE}
 ENDHERE
 
     else
